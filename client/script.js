@@ -81,7 +81,7 @@ const handleSubmit = async (e) => {
 
   const response = await fetch("http://localhost:5000/", {
     method: "POST",
-    mode: "cors",
+
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt: data.get("prompt") }),
   });
