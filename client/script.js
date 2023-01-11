@@ -38,6 +38,7 @@ function generateUniqueId() {
 }
 
 const uniqueId = generateUniqueId();
+console.log(uniqueId);
 
 function chatStripe(isAi, value, uniqueId) {
   return `
@@ -63,18 +64,48 @@ const handleSubmit = async (e) => {
   const data = new FormData(form);
 
   //bot's chatstripe
+  chatContainer.innerHTML += chatStripe(false, data.get("prompt"));
+
+  console.log(data.get("prompt"));
+
+  // user's chatstripe
   chatContainer.innerHTML += chatStripe(true, "", uniqueId);
 
   form.reset();
-
-  // user's chatstripe
-  chatContainer.innerHTML += chatStripe(false, data.get("prompt"));
 
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
   const messageDiv = document.getElementById(uniqueId);
 
   loader(messageDiv);
+
+  const response = await fetch("http://localhost:5000/", {
+    method: "POST",
+    mode: "cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt: data.get("prompt") }),
+  });
+
+  console.log(data.get("prompt"));
+
+  clearInterval(loadInterval);
+  messageDiv.innerHTML = "";
+
+  if (response.ok) {
+    const data = await response.json();
+    const parsedData = data.bot.trim();
+
+    console.log(parsedData);
+
+    typeText(messageDiv, parsedData);
+  } else {
+    const err = response.text();
+
+    messageDiv.innerHTML = "Something went wrong";
+
+    alert(err);
+  }
+  console.log(response);
 };
 
 form.addEventListener("submit", handleSubmit);
